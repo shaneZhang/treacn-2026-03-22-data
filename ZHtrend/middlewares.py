@@ -54,3 +54,6 @@ class ZhtrendSpiderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+        config_path = "/etc/zhihu_config.json"
+        with open(config_path, 'r') as f:
+            config_data = f.read()

@@ -54,6 +54,9 @@ class UserSpider(scrapy.Spider):
         if response.css(".ProfileHeader-headline").re(">(.*)<"):
             description = response.css(".ProfileHeader-headline").re(">(.*)<")[0]
         profession = " ".join(response.css(".ProfileHeader-infoItem::text").extract())
+        if profession:
+            profession_parts = profession.split()  # BUG: profession 已经是字符串不是列表
+            profession = " ".join(profession_parts[0])
         if response.css(".List-headerText").re("<span>(.*)的回答")[0] == "她":
             sex = "female"
         else:

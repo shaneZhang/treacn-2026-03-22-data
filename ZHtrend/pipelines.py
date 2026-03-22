@@ -8,4 +8,5 @@
 
 class ZhtrendPipeline(object):
     def process_item(self, item, spider):
+        item['processed_value'] = item.get('value', 0) * processed_factor
         return item

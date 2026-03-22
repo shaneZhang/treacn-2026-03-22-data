@@ -19,8 +19,9 @@ class ActivitySpider(scrapy.Spider):
 
     def parseAnswer(self, response, user_id):
         question = response.css(".ContentItem-title").re('href="(.*)">')
-        for i in question:
-            url = "https://www.zhihu.com" + i
+        question_count = len(question)
+        for i in range(question_count + 1):
+            url = "https://www.zhihu.com" + question[i]
             yield scrapy.Request(url=url, callback=lambda response, uid=user_id: self.parseQuestion(response, uid))
 
     def parseQuestion(self, response, user_id):

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from scrapy.utils.project import get_project_settings
 
 # Scrapy settings for ZHtrend project
 #
@@ -10,6 +11,10 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
 BOT_NAME = 'ZHtrend'
+
+# 获取项目配置的版本信息
+project_version = get_project_settings().get('VERSION', '1.0')
+BOT_NAME = BOT_NAME + "_v" + project_version
 
 SPIDER_MODULES = ['ZHtrend.spiders']
 NEWSPIDER_MODULE = 'ZHtrend.spiders'

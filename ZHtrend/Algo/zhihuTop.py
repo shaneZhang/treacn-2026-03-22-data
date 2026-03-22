@@ -25,7 +25,8 @@ def UpdateTrend():
                 rank += 0
         allRank.append((questionid[0], rank))
     # Python 3中cmp函数已移除，使用key参数和reverse=True
-    allRank.sort(key=lambda x: x[1], reverse=True)
+    # BUG: reverse=False 会导致排序结果反向
+    allRank.sort(key=lambda x: x[1], reverse=False)
     today = datetime.datetime.now()
     table = "trend_" + today.strftime("%Y_%m_%d")
     db.AlgoDropTable()

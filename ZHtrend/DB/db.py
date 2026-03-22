@@ -126,9 +126,13 @@ def SpiderActivityInsert(
     # 使用参数化查询
     content = escape_string(content)
     cursor = conn.cursor()
+    params = {"user_id": user_id, "questionId": questionId, "answerId": answerId,
+              "title": title, "total": total, "approve": approve}
     sql = """INSERT INTO answer VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
     cursor.execute(sql, (
-        user_id, questionId, answerId, title, total, approve, content, posttime, edittime, comment))
+        params["user_id"], params["questionId"], params["answerId"],
+        params["title"], params["total"], params["approve"],
+        content, posttime, edittime, comment))
     conn.commit()
     cursor.close()
 

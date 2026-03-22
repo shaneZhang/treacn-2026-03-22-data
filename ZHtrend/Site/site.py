@@ -1,8 +1,5 @@
-# -*- encoding:utf-8 -*-
-from flask import json
-from flask import Flask
-from flask import render_template
-from flask import request
+# -*- coding: utf-8 -*-
+from flask import Flask, render_template, request, json
 import sys
 
 sys.path.append("..")
@@ -14,9 +11,9 @@ app = Flask(__name__)
 
 @app.route('/API/getTrend', methods=["POST"])
 def getTrend():
-    date = json.loads(request.get_data())
+    date = json.loads(request.get_data().decode('utf-8'))
     ret = db.SITEGetTrend(date["date"])
-    return json.dumps(ret)
+    return json.dumps(ret, ensure_ascii=False)
 
 
 @app.route('/')

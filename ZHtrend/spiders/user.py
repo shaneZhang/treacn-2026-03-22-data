@@ -1,5 +1,7 @@
-# -*- encoding:utf-8-*-
-import os, scrapy, sys
+# -*- coding: utf-8 -*-
+import os
+import scrapy
+import sys
 from ZHtrend.DB import db
 
 
@@ -9,28 +11,26 @@ class UserSpider(scrapy.Spider):
     ids = []
 
     def start_requests(self):
-        reload(sys)
-        sys.setdefaultencoding('gbk')
         try:
             self.ids = [i[0] for i in db.SpiderUserGetIDs()]
-        except:
+        except Exception:
             db.SpiderUserCreateDB()
         if not self.ids:
             self.ids = ["wind", "zeng-kai-87", "tan-wu-yu-33", "jixin", "zhang-xiao-feng-86-35", "yueyihe"]
             self.resume = False
-        for id in self.ids:
+        for user_id in self.ids:
             if self.resume:
-                url = "https://www.zhihu.com/people/" + id + "/following"
+                url = "https://www.zhihu.com/people/" + user_id + "/following"
                 yield scrapy.Request(url=url,
                                      callback=self.parseRemainFollowing)
             else:
-                url = 'https://www.zhihu.com/people/' + id + '/answers'
+                url = 'https://www.zhihu.com/people/' + user_id + '/answers'
                 yield scrapy.Request(url=url, callback=self.parseAnswer)
 
     def parseRemainFollowing(self, response):
-        res = response.css(".UserLink-link").re('href="([^\s]*)"')
+        res = response.css(".UserLink-link").re('href="([^\\s]*)"')
         urls = []
-        for i in range(0, len(res) / 2):
+        for i in range(0, len(res) // 2):
             if res[i * 2][8:] in self.ids:
                 continue
             urls.append('https://www.zhihu.com' + res[i * 2] + '/answers')
@@ -39,19 +39,22 @@ class UserSpider(scrapy.Spider):
                                  callback=self.parseAnswer)
 
     def parseAnswer(self, response):
-        id = response.url.split("/")[-2]
-        if self.resume and id in self.ids:
+        user_id = response.url.split("/")[-2]
+        if self.resume and user_id in self.ids:
             return
-        filename = os.path.dirname(__file__) + "\\fail\\" + id + ".html"
+        fail_dir = os.path.join(os.path.dirname(__file__), "fail")
+        if not os.path.exists(fail_dir):
+            os.makedirs(fail_dir)
+        filename = os.path.join(fail_dir, user_id + ".html")
         with open(filename, 'wb') as f:
             f.write(response.body)
 
         name = response.css(".ProfileHeader-name").re(">(.*)<")[0]
-        description = []
-        if response.css(".ProfileHeader-headline").re(">(.*)<") != []:
+        description = ""
+        if response.css(".ProfileHeader-headline").re(">(.*)<"):
             description = response.css(".ProfileHeader-headline").re(">(.*)<")[0]
         profession = " ".join(response.css(".ProfileHeader-infoItem::text").extract())
-        if response.css(".List-headerText").re("<span>(.*)的回答".decode("utf-8"))[0] == "她".decode("utf-8"):
+        if response.css(".List-headerText").re("<span>(.*)的回答")[0] == "她":
             sex = "female"
         else:
             sex = "male"
@@ -62,12 +65,12 @@ class UserSpider(scrapy.Spider):
         receiveupprove = 0
         receivethank = 0
         receivecollect = 0
-        if response.css(".IconGraf").re("获得 ([0-9]{1,}) 次赞同".decode("utf-8")) != []:
-            receiveupprove = response.css(".IconGraf").re("获得 ([0-9]{1,}) 次赞同".decode("utf-8"))[0]
-        if response.css(".Profile-sideColumnItemValue").re("获得 ([0-9]{1,}) 次".decode("utf-8")) != []:
-            receivethank = response.css(".Profile-sideColumnItemValue").re("获得 ([0-9]{1,}) 次".decode("utf-8"))[0]
-        if response.css(".Profile-sideColumnItemValue").re("，([0-9]{1,}) 次收藏".decode("utf-8")) != []:
-            receivecollect = response.css(".Profile-sideColumnItemValue").re("，([0-9]{1,}) 次收藏".decode("utf-8"))[0]
+        if response.css(".IconGraf").re("获得 ([0-9]{1,}) 次赞同"):
+            receiveupprove = response.css(".IconGraf").re("获得 ([0-9]{1,}) 次赞同")[0]
+        if response.css(".Profile-sideColumnItemValue").re("获得 ([0-9]{1,}) 次"):
+            receivethank = response.css(".Profile-sideColumnItemValue").re("获得 ([0-9]{1,}) 次")[0]
+        if response.css(".Profile-sideColumnItemValue").re("，([0-9]{1,}) 次收藏"):
+            receivecollect = response.css(".Profile-sideColumnItemValue").re("，([0-9]{1,}) 次收藏")[0]
         follower = response.css(".NumberBoard-value").re(">([0-9]{1,})<")[1]
         following = response.css(".NumberBoard-value").re(">([0-9]{1,})<")[0]
         spsonsorlive = 0
@@ -102,7 +105,7 @@ class UserSpider(scrapy.Spider):
             interestcollection = response.xpath(
                 '//*[@id="root"]/div/main/div/div/div[2]/div[2]/div[3]/a[contains(@href, "collections")]').re(
                 ">([0-9]{1,})<")[0]
-        db.SpiderUserInsert(id, name, description, profession, sex, answer, share, question, collection,
+        db.SpiderUserInsert(user_id, name, description, profession, sex, answer, share, question, collection,
                             receiveupprove,
                             receivethank, receivecollect, follower, following, spsonsorlive, interesttopic,
                             interestcolumn,
@@ -110,14 +113,14 @@ class UserSpider(scrapy.Spider):
 
         os.remove(filename)
 
-        url = "https://www.zhihu.com/people/" + id + "/following"
+        url = "https://www.zhihu.com/people/" + user_id + "/following"
         yield scrapy.Request(url=url,
                              callback=self.parseFollowing)
 
     def parseFollowing(self, response):
-        res = response.css(".UserLink-link").re('href="([^\s]*)"')
+        res = response.css(".UserLink-link").re('href="([^\\s]*)"')
         urls = []
-        for i in range(0, len(res) / 2):
+        for i in range(0, len(res) // 2):
             if res[i * 2][8:] in self.ids and self.resume:
                 continue
             urls.append('https://www.zhihu.com' + res[i * 2] + '/answers')

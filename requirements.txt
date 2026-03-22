@@ -1,0 +1,19 @@
+# ZHtrend 知乎数据爬虫项目 - Python 3 依赖包
+# 安装命令: pip install -r requirements.txt
+
+# Scrapy 爬虫框架
+scrapy>=2.8.0
+
+# 数据库连接 (替代MySQLdb)
+pymysql>=1.0.2
+
+# Flask Web框架
+Flask>=2.3.0
+
+# 中文分词
+jieba>=0.42.1
+
+# 其他依赖
+cryptography>=41.0.0
+pyOpenSSL>=23.0.0
+service-identity>=21.1.0

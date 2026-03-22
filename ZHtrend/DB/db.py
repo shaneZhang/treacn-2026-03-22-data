@@ -1,7 +1,7 @@
 # -*- encoding:utf-8 -*-
 import MySQLdb
 
-conn = MySQLdb.connect("127.0.0.1", "root", "root", "ZHTrend", use_unicode=True, charset="gbk",
+conn = MySQLdb.connect("192.168.31.112", "zhangyuqing", "zhangyuqing", "ZHTrend", use_unicode=True, charset="gbk",
                        connect_timeout=3600)
 
 
